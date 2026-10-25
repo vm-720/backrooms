@@ -1,0 +1,8 @@
+{
+  "name": "backrooms",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test/maze.test.mjs"
+  }
+}
