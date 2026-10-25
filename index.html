@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Backrooms: Level 0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="grain"></div>
+    <div id="vignette"></div>
+
+    <div id="hud" class="hidden">
+      <div id="stamina"><div id="stamina-fill"></div></div>
+    </div>
+
+    <div id="start" class="screen">
+      <h1>THE BACKROOMS</h1>
+      <p class="sub">Level 0 &middot; The Lobby</p>
+      <p class="story">You noclipped out of reality. Find the way out.</p>
+      <ul class="controls">
+        <li><b>WASD</b> walk</li>
+        <li><b>Mouse</b> look</li>
+        <li><b>Shift</b> run (about 7 seconds)</li>
+        <li><b>Esc</b> pause</li>
+      </ul>
+      <button id="enter">Click to enter</button>
+      <p class="note">Best with headphones.</p>
+    </div>
+
+    <div id="pause" class="screen hidden">
+      <h2>PAUSED</h2>
+      <label>Mouse sensitivity <input id="sens" type="range" min="0.2" max="3" step="0.1" value="1" /></label>
+      <label>Volume <input id="vol" type="range" min="0" max="1" step="0.05" value="0.8" /></label>
+      <div class="row">
+        <button id="resume">Resume</button>
+        <button id="restart" class="secondary">New maze</button>
+      </div>
+      <p class="note">Maze #<span id="seed"></span></p>
+    </div>
+
+    <div id="win" class="screen hidden">
+      <h2>You found the exit.</h2>
+      <p class="sub">Time lost in Level 0: <span id="time"></span></p>
+      <p class="story">Level 1 coming soon.</p>
+      <button id="again">Play a new maze</button>
+    </div>
+
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,172 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #1b1709;
+  color: #efe3a8;
+  font-family: 'VT323', ui-monospace, monospace;
+}
+
+canvas {
+  display: block;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#grain,
+#vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+#grain {
+  opacity: 0.08;
+  mix-blend-mode: overlay;
+  background-size: 256px 256px;
+}
+
+#vignette {
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(10, 8, 0, 0.65) 100%);
+}
+
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  text-align: center;
+  background: rgba(26, 22, 8, 0.72);
+}
+
+#start {
+  background: rgba(26, 22, 8, 0.55);
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(48px, 10vw, 110px);
+  font-weight: normal;
+  letter-spacing: 0.08em;
+  color: #f4e7a1;
+  text-shadow: 0 0 18px rgba(255, 236, 140, 0.35), 3px 0 rgba(255, 60, 60, 0.25), -3px 0 rgba(60, 200, 255, 0.2);
+}
+
+h2 {
+  margin: 0;
+  font-size: clamp(36px, 7vw, 64px);
+  font-weight: normal;
+}
+
+.sub {
+  margin: 0;
+  font-size: 28px;
+  opacity: 0.85;
+}
+
+.story {
+  margin: 8px 0;
+  font-size: 24px;
+  opacity: 0.75;
+}
+
+.note {
+  margin: 4px 0 0;
+  font-size: 18px;
+  opacity: 0.55;
+}
+
+.controls {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 12px;
+  font-size: 22px;
+  line-height: 1.35;
+}
+
+.controls b {
+  display: inline-block;
+  min-width: 70px;
+  color: #fff6c8;
+}
+
+button {
+  font: inherit;
+  font-size: 30px;
+  padding: 8px 28px;
+  color: #1b1709;
+  background: #e9d77f;
+  border: 0;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #fff1a6;
+}
+
+button.secondary {
+  background: transparent;
+  color: #efe3a8;
+  outline: 2px solid #efe3a8;
+}
+
+.row {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 22px;
+  width: min(320px, 100%);
+}
+
+input[type='range'] {
+  accent-color: #e9d77f;
+}
+
+#hud {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 3;
+  pointer-events: none;
+}
+
+#stamina {
+  width: 160px;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  transition: opacity 0.6s;
+}
+
+#stamina.full {
+  opacity: 0.25;
+}
+
+#stamina-fill {
+  height: 100%;
+  width: 100%;
+  background: #efe3a8;
+}
+
+#stamina.tired #stamina-fill {
+  background: #c9583e;
+}
