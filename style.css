@@ -170,3 +170,141 @@ input[type='range'] {
 #stamina.tired #stamina-fill {
   background: #c9583e;
 }
+
+/* ---------- Phones and tablets ---------- */
+
+body {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.touch-only {
+  display: none;
+}
+
+body.touch .touch-only {
+  display: block;
+}
+
+body.touch .desktop-only {
+  display: none;
+}
+
+#touch {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+}
+
+#stick-base {
+  position: absolute;
+  left: calc(80px + env(safe-area-inset-left));
+  top: calc(100% - 90px - env(safe-area-inset-bottom));
+  width: 110px;
+  height: 110px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid rgba(239, 227, 168, 0.25);
+  background: rgba(239, 227, 168, 0.06);
+  pointer-events: none;
+  transition: opacity 0.2s;
+  opacity: 0.6;
+}
+
+#stick-base.active {
+  opacity: 1;
+  transition: none;
+}
+
+#stick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(239, 227, 168, 0.45);
+  transform: translate(-50%, -50%);
+}
+
+#run-btn,
+#pause-btn {
+  position: absolute;
+  padding: 0;
+  color: #efe3a8;
+  background: rgba(239, 227, 168, 0.1);
+  border: 2px solid rgba(239, 227, 168, 0.35);
+  border-radius: 50%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#run-btn {
+  right: calc(40px + env(safe-area-inset-right));
+  bottom: calc(50px + env(safe-area-inset-bottom));
+  width: 84px;
+  height: 84px;
+  font-size: 26px;
+}
+
+#run-btn.on {
+  background: rgba(239, 227, 168, 0.55);
+  color: #1b1709;
+}
+
+#pause-btn {
+  right: calc(18px + env(safe-area-inset-right));
+  top: calc(14px + env(safe-area-inset-top));
+  width: 46px;
+  height: 46px;
+  font-size: 22px;
+}
+
+/* Short screens, like a phone held sideways. */
+@media (max-height: 500px) {
+  .screen {
+    gap: 4px;
+  }
+
+  h1 {
+    font-size: 44px;
+  }
+
+  h2 {
+    font-size: 36px;
+  }
+
+  .sub {
+    font-size: 22px;
+  }
+
+  .story {
+    font-size: 18px;
+    margin: 2px 0;
+  }
+
+  .controls {
+    font-size: 17px;
+    margin: 2px 0 6px;
+    line-height: 1.2;
+  }
+
+  .controls b {
+    min-width: 0;
+    margin-right: 6px;
+  }
+
+  button {
+    font-size: 24px;
+    padding: 6px 22px;
+  }
+
+  label {
+    font-size: 18px;
+  }
+
+  .note {
+    font-size: 15px;
+  }
+}
