@@ -2,6 +2,7 @@ import * as THREE from '../vendor/three.module.min.js';
 import { generateMaze, collectSolids, makeRng, CELL, WALL_T, WALL_H } from './maze.js';
 import { wallpaperTexture, carpetTexture, ceilingTexture, lightPanelTexture, exitSignTexture } from './textures.js';
 import { GameAudio } from './audio.js';
+import { setupTouch } from './touch.js';
 
 // ---------- Tuning ----------
 const EYE = 1.65;
@@ -20,6 +21,8 @@ const FOG = new THREE.Color('#3b3417');
 
 const params = new URLSearchParams(location.search);
 const testMode = params.has('test');
+// Phones and tablets get on-screen controls instead of mouse and keyboard.
+const isTouch = params.has('touch') || window.matchMedia('(pointer: coarse)').matches;
 const seed = Number(params.get('seed')) || Math.floor(Math.random() * 1e9);
 const maze = generateMaze(seed);
 const { W, H } = maze;
@@ -347,11 +350,15 @@ const audio = new GameAudio();
 audio.setVolume(settings.vol);
 
 function updatePlayer(dt) {
-  const f = (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0);
-  const r = (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0);
-  const moving = f !== 0 || r !== 0;
-  const wantRun = keys.has('ShiftLeft') || keys.has('ShiftRight');
-  const running = wantRun && moving && f >= 0 && !player.exhausted && player.stamina > 0;
+  const stick = touch ? touch.input : { f: 0, r: 0, run: false };
+  const clamp1 = (v) => Math.max(-1, Math.min(1, v));
+  const f = clamp1((keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + stick.f);
+  const r = clamp1((keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + stick.r);
+  const moving = Math.hypot(f, r) > 0.2;
+  const wantRun = keys.has('ShiftLeft') || keys.has('ShiftRight') || stick.run;
+  const running = wantRun && moving && f >= -0.2 && !player.exhausted && player.stamina > 0;
+  // The RUN button is a toggle: it switches itself off when you stop or run dry.
+  if (touch && stick.run && (!moving || player.exhausted)) touch.stopRunning();
 
   if (running) {
     player.stamina = Math.max(0, player.stamina - dt);
@@ -434,13 +441,19 @@ const screens = { start: $('start'), pause: $('pause'), win: $('win') };
 function show(name) {
   for (const [n, el] of Object.entries(screens)) el.classList.toggle('hidden', n !== name);
   $('hud').classList.toggle('hidden', name !== null);
+  $('touch').classList.toggle('hidden', !(isTouch && name === null));
 }
 $('seed').textContent = seed;
 $('sens').value = settings.sens;
 $('vol').value = settings.vol;
 
 function lock() {
-  if (testMode) {
+  if (testMode || isTouch) {
+    if (isTouch && !testMode) {
+      // Best effort: neither works on every phone, and that's fine.
+      document.documentElement.requestFullscreen?.().catch(() => {});
+      screen.orientation?.lock?.('landscape').catch(() => {});
+    }
     begin();
     return;
   }
@@ -456,6 +469,7 @@ function pause() {
   if (state !== 'playing') return;
   state = 'paused';
   keys.clear();
+  touch?.reset();
   audio.suspend();
   show('pause');
 }
@@ -471,7 +485,8 @@ function win() {
   audio.suspend();
 }
 function newMaze() {
-  location.search = `?seed=${Math.floor(Math.random() * 1e9)}${testMode ? '&test' : ''}`;
+  const keep = ['test', 'touch'].filter((k) => params.has(k)).map((k) => '&' + k).join('');
+  location.search = `?seed=${Math.floor(Math.random() * 1e9)}${keep}`;
 }
 
 $('enter').addEventListener('click', lock);
@@ -504,6 +519,25 @@ window.addEventListener('keydown', (e) => {
 });
 window.addEventListener('keyup', (e) => keys.delete(e.code));
 window.addEventListener('blur', () => keys.clear());
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) pause();
+});
+
+const touch = isTouch
+  ? setupTouch($('touch'), {
+      onLook(dx, dy) {
+        if (state !== 'playing') return;
+        const k = 0.005 * settings.sens;
+        player.yaw -= dx * k;
+        player.pitch = Math.max(-1.45, Math.min(1.45, player.pitch - dy * k));
+      },
+      onPause: pause,
+    })
+  : null;
+if (isTouch) {
+  document.body.classList.add('touch');
+  $('enter').textContent = 'Tap to enter';
+}
 
 // ---------- Film grain ----------
 {
