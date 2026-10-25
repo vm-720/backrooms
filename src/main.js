@@ -22,7 +22,12 @@ const FOG = new THREE.Color('#3b3417');
 const params = new URLSearchParams(location.search);
 const testMode = params.has('test');
 // Phones and tablets get on-screen controls instead of mouse and keyboard.
-const isTouch = params.has('touch') || window.matchMedia('(pointer: coarse)').matches;
+// iPhones can't lock the mouse pointer at all, so a touch screen without
+// pointer lock always gets touch controls.
+const isTouch =
+  params.has('touch') ||
+  window.matchMedia('(pointer: coarse)').matches ||
+  (navigator.maxTouchPoints > 0 && !('requestPointerLock' in Element.prototype));
 const seed = Number(params.get('seed')) || Math.floor(Math.random() * 1e9);
 const maze = generateMaze(seed);
 const { W, H } = maze;
@@ -450,15 +455,29 @@ $('vol').value = settings.vol;
 function lock() {
   if (testMode || isTouch) {
     if (isTouch && !testMode) {
-      // Best effort: neither works on every phone, and that's fine.
-      document.documentElement.requestFullscreen?.().catch(() => {});
-      screen.orientation?.lock?.('landscape').catch(() => {});
+      // Best effort: neither works on every phone (iPhones support neither), and that's fine.
+      try {
+        document.documentElement.requestFullscreen?.()?.catch?.(() => {});
+      } catch {}
+      try {
+        screen.orientation?.lock?.('landscape')?.catch?.(() => {});
+      } catch {}
     }
     begin();
     return;
   }
-  const req = renderer.domElement.requestPointerLock();
-  if (req && req.catch) req.catch(() => {});
+  // If the browser won't lock the mouse (some browsers, embedded pages),
+  // start anyway and look around by dragging with the mouse button held.
+  if (!renderer.domElement.requestPointerLock) {
+    begin();
+    return;
+  }
+  try {
+    const req = renderer.domElement.requestPointerLock();
+    if (req && req.catch) req.catch(() => begin());
+  } catch {
+    begin();
+  }
 }
 function begin() {
   state = 'playing';
@@ -507,15 +526,17 @@ document.addEventListener('pointerlockchange', () => {
   if (document.pointerLockElement === renderer.domElement) begin();
   else pause();
 });
+document.addEventListener('pointerlockerror', () => begin());
 document.addEventListener('mousemove', (e) => {
-  if (state !== 'playing' || !document.pointerLockElement) return;
+  if (state !== 'playing') return;
+  if (!document.pointerLockElement && !(e.buttons & 1)) return;
   const k = 0.0022 * settings.sens;
   player.yaw -= e.movementX * k;
   player.pitch = Math.max(-1.45, Math.min(1.45, player.pitch - e.movementY * k));
 });
 window.addEventListener('keydown', (e) => {
   if (state === 'playing') keys.add(e.code);
-  if (testMode && e.code === 'Escape') pause();
+  if (e.code === 'Escape' && !document.pointerLockElement) pause();
 });
 window.addEventListener('keyup', (e) => keys.delete(e.code));
 window.addEventListener('blur', () => keys.clear());
